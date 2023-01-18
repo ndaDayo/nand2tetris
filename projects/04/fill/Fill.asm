@@ -12,3 +12,51 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+@i // count address  
+M = 0
+
+(LOOP)
+@KBD
+D = M
+@black
+D; JGT
+@white
+D; JEQ
+
+(black)
+@i
+D = M
+@8191
+D = D - A
+@LOOP
+D; JGT
+
+@i
+D = M
+@SCREEN
+A = A + D
+M = -1
+@i
+M = M + 1
+
+@LOOP
+0; JMP
+
+(white)
+@i
+D = M
+@reset
+D; JLT
+@SCREEN
+A = A + D
+M = 0
+@i
+M = M - 1
+@LOOP
+0; JMP
+
+(reset)
+@i
+M = 0
+@LOOP
+0; JMP
