@@ -12,51 +12,54 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
-@i // count address  
-M = 0
+@8192 // 256 * 32bit
+D = A
+@SCREEN
+D = D + A // D = 8192 + 16384
+@max_screen_address
+M = D
 
-(LOOP)
+(key)
+@SCREEN
+D = A
+@address
+M = D
+
 @KBD
 D = M
-@black
-D; JGT
 @white
-D; JEQ
-
-(black)
-@i
-D = M
-@8191
-D = D - A
-@LOOP
-D; JGT
-
-@i
-D = M
-@SCREEN
-A = A + D
-M = -1
-@i
-M = M + 1
-
-@LOOP
-0; JMP
+D; JEQ // if KBD == 0 then white
+@black
+D; JMP
 
 (white)
-@i
-D = M
-@reset
-D; JLT
-@SCREEN
-A = A + D
+@color
 M = 0
-@i
-M = M - 1
-@LOOP
+@loop
 0; JMP
 
-(reset)
-@i
-M = 0
-@LOOP
+(black)
+@color
+M = -1
+@loop
 0; JMP
+
+(loop)
+@color
+D = M
+@address
+A = M 
+M = D
+
+D = A + 1
+@address
+M = D
+
+@max_screen_address
+D = M - D
+@loop
+D; JNE 
+
+@key
+0; JMP 
+
