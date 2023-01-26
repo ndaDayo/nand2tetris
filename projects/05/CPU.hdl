@@ -41,7 +41,7 @@ CHIP CPU {
     PARTS:
       ALU(
         x = outDreg,
-        y = outAreg,
+        y = outMorA,
         zx = instruction[11],
         nx = instruction[10],
         zy = instruction[9],
@@ -50,13 +50,43 @@ CHIP CPU {
         no = instruction[6],
         zr = outZr,
         ng = outNg,
-        out = outALU,
+        out = outM,
         out = inDreg,
+        out = outMA,
       );
 
       // DRegister
       And(a = instruction[15], b = instruction[4], out = writeD);
       DRegister(in = inDreg, load = writeD, out = outDreg);
+
+      // ARegister
+      Mux16(a = instruction, b = outMA, sel = instruction[15], out = inA);
+
+          // writeA logic
+          Not(in = instruction[15], out = isAInst);
+          Or(a = isAInst, b = instruction[5], out = writeA);
+
+      ARegister(in = inA, load = writeA, out = outA, out[0..14] = addressM); 
+      Mux16(a = outA, b = inM, sel = instruction[12], out = outMorA);
+
+      // writeM
+      And(a = instruction[15], b = instruction[3], out = writeM);
+
+      // Jump logic
+          // JLT logic
+          And(a = instruction[2], b = outNg, out = JLT);
+          // JEQ logic
+          And(a = instruction[1], b = outZr, out = JEQ);
+          // JGT logic
+          Or(a = outZr, b = outNg, out = outZrOrNg);
+          Not(in = outZrOrNg, out = outPos);
+          And(a = outPos, b = instruction[0], out = JGT);
+      
+      Or(a = JLT, b = JEQ, out = JLTorJEQ);
+      Or(a = JLTorJEQ, b = JGT, out = jump);
+
+      // Program Counter 
+      PC(in = outA, load = jump, inc = true, reset = reset, out[0..14] = pc);
 }
 
 
