@@ -51,6 +51,12 @@ CHIP CPU {
         zr = outZr,
         ng = outNg,
         out = outALU,
+        out = inDreg,
       );
+
+      // DRegister
+      And(a = instruction[15], b = instruction[4], out = writeD);
+      DRegister(in = inDreg, load = writeD, out = outDreg);
 }
+
 
