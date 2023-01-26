@@ -40,36 +40,17 @@ CHIP CPU {
 
     PARTS:
       ALU(
-         x = outD,
-         y = outAM,
-         zx = instruction[11],
-         nx = instruction[10],
-         zy = instruction[9],
-         ny= instruction[8],
-         f = instruction[7],
-         no = instruction[6],
-         zr = zr,
-         ng = ng,
-         out = outM,
-         out = outALU,
-     );
-
-      // Registers
-      DRegister(in = outALU, load = loadD, out = outD);
-      ARegister(in = inA, load = loadA, out = outA);
-      PC(in = outA, inc = true, load = loadPC, reset = reset, out[0..14] = pc);
-
-      // Muxes
-      Mux16(a = outALU, b = instruction, sel = instA, out = inA);
-      Mux16(a = outA, b = inM, sel = AMtoALU, out = outAM);
-
-      // Decoder
-         // instA logic
-         // if instruction[15] == 0 then A instruction
-         Not(in = instruction[15], out = instA);
-
-         // loadD logic
-         // instruction[4] is dist4, dist4 is 1 then load DRegister
-         And(a = instruction[15], b = instruction[4], out = loadD);
+        x = outDreg,
+        y = outAreg,
+        zx = instruction[11],
+        nx = instruction[10],
+        zy = instruction[9],
+        ny = instruction[8],
+        f = instruction[7],
+        no = instruction[6],
+        zr = outZr,
+        ng = outNg,
+        out = outALU,
+      );
 }
 
