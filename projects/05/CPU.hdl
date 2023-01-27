@@ -3,6 +3,7 @@
 // by Nisan and Schocken, MIT Press.
 // File name: projects/05/CPU.hdl
 
+
 /**
  * The Hack CPU (Central Processing unit), consisting of an ALU,
  * two registers named A and D, and a program counter named PC.
@@ -39,54 +40,62 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-      ALU(
-        x = outDreg,
-        y = outMorA,
-        zx = instruction[11],
-        nx = instruction[10],
-        zy = instruction[9],
-        ny = instruction[8],
-        f = instruction[7],
-        no = instruction[6],
-        zr = outZr,
-        ng = outNg,
-        out = outM,
-        out = inDreg,
-        out = outMA,
-      );
-
       // DRegister
-      And(a = instruction[15], b = instruction[4], out = writeD);
-      DRegister(in = inDreg, load = writeD, out = outDreg);
+        // In Logic
+        Mux16(a = instruction, b = aluOut, sel = instruction[15], out = inD, out = inA);
+        // loadD
+        And(a = instruction[15], b = instruction[4], out = loadD);
+        // DRegister
+        DRegister(in = inD, load = loadD, out = outD);
 
       // ARegister
-      Mux16(a = instruction, b = outMA, sel = instruction[15], out = inA);
+        // loadA
+        Not(in = instruction[15], out = isInstructionA);
+        Or(a = isInstructionA, b = instruction[5], out = loadA);
+        // ARegister
+        ARegister(in = inA, load = loadA, out = outA, out[0..14] = addressM);
+      
+      // Alu Y pin
+      Mux16(a = outA, b = inM, sel = instruction[12], out = yPin);
+      
+      // Jump Logic 
+        // zero nag 
+        Not(in = zr, out = notZr);
+        Not(in = ng, out = notNg);
 
-          // writeA logic
-          Not(in = instruction[15], out = isAInst);
-          Or(a = isAInst, b = instruction[5], out = writeA);
-
-      ARegister(in = inA, load = writeA, out = outA, out[0..14] = addressM); 
-      Mux16(a = outA, b = inM, sel = instruction[12], out = outMorA);
-
+        // JLT 
+        And(a = instruction[2], b = ng, out = JLEOrJLT);
+        // JGE
+        And(a = instruction[0], b = notNg, out = JGTOrJGE);
+        // Integrate
+        Or(a = JGTOrJGE, b = JLEOrJLT, out = nagAndPos);
+        And(a = notZr, b = nagAndPos, out = w4);
+        // JEQ
+        And(a = instruction[1], b = zr, out = JEQ);
+        // Integrate
+        Or(a = nagAndPos, b = JEQ, out = jump);
+        // Jump
+        And(a = jump, b = instruction[15], out = loadPC);
+      
       // writeM
       And(a = instruction[15], b = instruction[3], out = writeM);
-
-      // Jump logic
-          // JLT logic
-          And(a = instruction[2], b = outNg, out = JLT);
-          // JEQ logic
-          And(a = instruction[1], b = outZr, out = JEQ);
-          // JGT logic
-          Or(a = outZr, b = outNg, out = outZrOrNg);
-          Not(in = outZrOrNg, out = outPos);
-          And(a = outPos, b = instruction[0], out = JGT);
       
-      Or(a = JLT, b = JEQ, out = JLTorJEQ);
-      Or(a = JLTorJEQ, b = JGT, out = jump);
-
-      // Program Counter 
-      PC(in = outA, load = jump, inc = true, reset = reset, out[0..14] = pc);
+      // ALU
+      ALU(
+          x = outD,
+          y = yPin,
+          zx = instruction[11],
+          nx = instruction[10],
+          zy = instruction[9],
+          ny = instruction[8],
+          f = instruction[7],
+          no = instruction[6],
+          zr = zr,
+          ng = ng,
+          out = aluOut,
+          out = outM 
+      );
+        
+      // PC
+      PC(in = outA, load = loadPC, inc = true, reset = reset, out[0..14] = pc);
 }
-
-
