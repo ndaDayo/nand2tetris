@@ -63,17 +63,17 @@ CHIP CPU {
         Not(in = zr, out = notZr);
         Not(in = ng, out = notNg);
 
-        // JLT 
+        // JLEOrJLT
         And(a = instruction[2], b = ng, out = JLEOrJLT);
-        // JGE
+        // JGTOrJGE
         And(a = instruction[0], b = notNg, out = JGTOrJGE);
         // Integrate
-        Or(a = JGTOrJGE, b = JLEOrJLT, out = nagAndPos);
-        And(a = notZr, b = nagAndPos, out = w4);
+        Or(a = JGTOrJGE, b = JLEOrJLT, out = nagOrPos);
+        And(a = notZr, b = nagOrPos, out = nagOrPosAndNotZr);
         // JEQ
         And(a = instruction[1], b = zr, out = JEQ);
         // Integrate
-        Or(a = nagAndPos, b = JEQ, out = jump);
+        Or(a = nagOrPosAndNotZr, b = JEQ, out = jump);
         // Jump
         And(a = jump, b = instruction[15], out = loadPC);
       
