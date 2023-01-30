@@ -111,3 +111,11 @@ func (p *Parser) Comp() string {
 
 	return strings.Split(p.currentCommand, ";")[0]
 }
+
+func (p *Parser) Jump() string {
+	if strings.Contains(p.currentCommand, ";") {
+		return strings.Split(p.currentCommand, ";")[1]
+	}
+
+	return ""
+}
