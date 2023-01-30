@@ -91,3 +91,29 @@ func TestCommandType(t *testing.T) {
 		}
 	}
 }
+
+type symbolTest struct {
+	in  string
+	out string
+}
+
+func TestSymbol(t *testing.T) {
+	tests := []symbolTest{
+		{"@i", "i"},
+		{"@sum", "sum"},
+		{"@100", "100"},
+		{"(LOOP)", "LOOP"},
+		{"(END)", "END"},
+	}
+
+	for i, test := range tests {
+		b := bytes.NewBufferString(test.in)
+		p := New(b)
+		p.currentCommand = test.in
+		symbol := p.Symbol()
+
+		if symbol != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, symbol, test.out)
+		}
+	}
+}
