@@ -117,3 +117,33 @@ func TestSymbol(t *testing.T) {
 		}
 	}
 }
+
+type destTest struct {
+	in  string
+	out string
+}
+
+func TestDest(t *testing.T) {
+	tests := []destTest{
+		{"0;JMP", ""},
+		{"M=M+1", "M"},
+		{"D=M", "D"},
+		{"MD=M-1", "MD"},
+		{"A=A+1", "A"},
+		{"AM=A+1", "AM"},
+		{"AD=A+1", "AD"},
+		{"AMD=A+1", "AMD"},
+	}
+
+	for i, test := range tests {
+		b := bytes.NewBufferString(test.in)
+		p := New(b)
+		p.currentCommand = test.in
+		dest := p.Dest()
+
+		if dest != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, dest, test.out)
+		}
+	}
+
+}

@@ -95,3 +95,11 @@ func (p *Parser) CommandType() (CommandTypes, error) {
 func (p *Parser) Symbol() string {
 	return strings.Trim(p.currentCommand, "@()")
 }
+
+func (p *Parser) Dest() string {
+	if strings.Contains(p.currentCommand, "=") {
+		return strings.Split(p.currentCommand, "=")[0]
+	}
+
+	return ""
+}
