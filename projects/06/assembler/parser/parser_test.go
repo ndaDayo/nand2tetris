@@ -198,3 +198,32 @@ func TestComp(t *testing.T) {
 		}
 	}
 }
+
+type jumpTest struct {
+	in  string
+	out string
+}
+
+func TestJump(t *testing.T) {
+	tests := []jumpTest{
+		{"M=1", ""},
+		{"D;JGT", "JGT"},
+		{"D;JEQ", "JEQ"},
+		{"D;JGE", "JGE"},
+		{"D;JLT", "JLT"},
+		{"D;JNE", "JNE"},
+		{"D;JLE", "JLE"},
+		{"0;JMP", "JMP"},
+	}
+
+	for i, test := range tests {
+		b := bytes.NewBufferString(test.in)
+		p := New(b)
+		p.currentCommand = test.in
+
+		jump := p.Jump()
+		if jump != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, jump, test.out)
+		}
+	}
+}
