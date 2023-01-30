@@ -3,6 +3,7 @@ package parser
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -57,3 +58,36 @@ func (p *Parser) Advance() error {
 }
 
 type CommandTypes int
+
+const (
+	A CommandTypes = iota
+	C
+	L
+	N
+	E
+)
+
+func (p *Parser) CommandType() (CommandTypes, error) {
+	c := p.currentCommand
+	if c == "" {
+		return N, nil
+	}
+
+	if strings.HasPrefix(c, "@") {
+		return A, nil
+	}
+
+	if strings.Contains(c, "=") {
+		return C, nil
+	}
+
+	if strings.Contains(c, ";") {
+		return C, nil
+	}
+
+	if strings.HasPrefix(c, "(") && strings.HasSuffix(c, ")") {
+		return L, nil
+	}
+
+	return E, errors.New("invalid command detected")
+}
