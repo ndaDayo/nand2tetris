@@ -55,3 +55,5 @@ func (p *Parser) Advance() error {
 
 	return nil
 }
+
+type CommandTypes int

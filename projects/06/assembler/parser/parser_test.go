@@ -63,3 +63,31 @@ func TestAdvance(t *testing.T) {
 		}
 	}
 }
+
+type commandTypeTest struct {
+	command string
+	out     CommandTypes
+}
+
+func TestCommandType(t *testing.T) {
+	tests := []commandTypeTest{
+		{"@i", 0},
+		{"@sum", 0},
+		{"D=M", 1},
+		{"M=M+1", 1},
+		{"0;JMP", 1},
+		{"(LOOP)", 2},
+		{"(END)", 2},
+	}
+
+	for i, test := range tests {
+		b := bytes.NewBufferString(test.command)
+		p := New(b)
+		p.currentCommand = test.command
+
+		command, _ := p.CommandType()
+		if command != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, command, test.out)
+		}
+	}
+}
