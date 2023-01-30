@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"strings"
 )
 
 type Parser struct {
@@ -26,6 +27,7 @@ func New(input io.Reader) *Parser {
 		string(b),
 	}
 }
+
 func (p *Parser) HasMoreCommand() bool {
 	_, err := p.reader.Peek(1)
 	if err != nil {
@@ -33,4 +35,23 @@ func (p *Parser) HasMoreCommand() bool {
 	}
 
 	return true
+}
+
+func (p *Parser) Advance() error {
+	b, _, err := p.reader.ReadLine()
+	line := string(b)
+	line = strings.Split(line, "//")[0]
+	line = strings.Trim(line, " ")
+
+	if err != nil {
+		return err
+	}
+	if line == "" {
+		p.Advance()
+		return nil
+	}
+
+	p.currentCommand = line
+
+	return nil
 }
