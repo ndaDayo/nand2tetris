@@ -1,31 +1,36 @@
 package parser
 
 import (
-	"assembler/symboltable"
-	"assembler/value"
-	"strings"
+	"bufio"
+	"bytes"
+	"io"
+	"io/ioutil"
 )
 
 type Parser struct {
-	*symboltable.SymbolTable
-	input             string
-	commandStrList    []string
-	currentCommandIdx int
-	readPosition      int
+	currentCommand string
+	reader         *bufio.Reader
+	source         string
 }
 
-func New(input string, symbolTable *symboltable.SymbolTable) *Parser {
-	parser := &Parser{
-		input:             input,
-		commandStrList:    strings.Split(input, value.NEW_LINE),
-		currentCommandIdx: 0,
-		readPosition:      0,
-		SymbolTable:       symbolTable,
+func New(input io.Reader) *Parser {
+	b, err := ioutil.ReadAll(input)
+	if err != nil {
+		panic(err)
 	}
 
-	return parser
+	r := bytes.NewReader(b)
+	return &Parser{
+		"",
+		bufio.NewReader(r),
+		string(b),
+	}
 }
+func (p *Parser) HasMoreCommand() bool {
+	_, err := p.reader.Peek(1)
+	if err != nil {
+		return false
+	}
 
-func (p *Parser) Advance() {
-	p.currentCommandIdx++
+	return true
 }
