@@ -91,3 +91,7 @@ func (p *Parser) CommandType() (CommandTypes, error) {
 
 	return E, errors.New("invalid command detected")
 }
+
+func (p *Parser) Symbol() string {
+	return strings.Trim(p.currentCommand, "@()")
+}
