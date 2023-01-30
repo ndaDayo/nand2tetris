@@ -103,3 +103,11 @@ func (p *Parser) Dest() string {
 
 	return ""
 }
+
+func (p *Parser) Comp() string {
+	if strings.Contains(p.currentCommand, "=") {
+		return strings.Split(p.currentCommand, "=")[1]
+	}
+
+	return strings.Split(p.currentCommand, ";")[0]
+}
