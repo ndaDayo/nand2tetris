@@ -91,3 +91,24 @@ func (c *Code) Comp(token string) (byte, error) {
 		return 0b0, errors.New("invalid comp detected")
 	}
 }
+
+func (c *Code) Jump(token string) byte {
+	switch token {
+	case "JGT":
+		return 0b001
+	case "JEQ":
+		return 0b010
+	case "JGE":
+		return 0b011
+	case "JLT":
+		return 0b100
+	case "JNE":
+		return 0b101
+	case "JLE":
+		return 0b110
+	case "JMP":
+		return 0b111
+	default:
+		return 0b0
+	}
+}
