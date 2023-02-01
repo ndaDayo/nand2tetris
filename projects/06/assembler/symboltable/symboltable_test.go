@@ -26,3 +26,31 @@ func TestAddEntry(t *testing.T) {
 		}
 	}
 }
+
+type containsTest struct {
+	in  string
+	out bool
+}
+
+func TestContains(t *testing.T) {
+	tests := []containsTest{
+		{"contained", true},
+		{"notcontained", false},
+		{"included", true},
+		{"notincluded", false},
+		{"sum", true},
+		{"weight", false},
+		{"", false},
+	}
+
+	s := New()
+	s.table["contained"] = 0
+	s.table["included"] = 3
+	s.table["sum"] = 5
+
+	for i, test := range tests {
+		if s.Contains(test.in) != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, test.in, test.out)
+		}
+	}
+}
