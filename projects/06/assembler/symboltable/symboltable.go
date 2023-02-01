@@ -18,3 +18,7 @@ func (s *SymbolTable) Contains(symbol string) bool {
 	_, ok := s.table[symbol]
 	return ok
 }
+
+func (s *SymbolTable) GetAddress(symbol string) int {
+	return s.table[symbol]
+}

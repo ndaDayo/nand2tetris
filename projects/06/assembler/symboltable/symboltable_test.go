@@ -36,8 +36,6 @@ func TestContains(t *testing.T) {
 	tests := []containsTest{
 		{"contained", true},
 		{"notcontained", false},
-		{"included", true},
-		{"notincluded", false},
 		{"sum", true},
 		{"weight", false},
 		{"", false},
@@ -45,12 +43,37 @@ func TestContains(t *testing.T) {
 
 	s := New()
 	s.table["contained"] = 0
-	s.table["included"] = 3
 	s.table["sum"] = 5
 
 	for i, test := range tests {
 		if s.Contains(test.in) != test.out {
 			t.Errorf("#%d: got: %v want: %v", i, test.in, test.out)
+		}
+	}
+}
+
+type getAddressTest struct {
+	symbol  string
+	address int
+}
+
+func TestGetAddress(t *testing.T) {
+	tests := []getAddressTest{
+		{"i", 1},
+		{"sum", 2},
+		{"LOOP", 3},
+		{"END", 4},
+	}
+
+	s := New()
+	for _, test := range tests {
+		s.AddEntry(test.symbol, test.address)
+	}
+
+	for i, test := range tests {
+		address := s.GetAddress(test.symbol)
+		if address != test.address {
+			t.Errorf("#%d: got: %v want: %v", i, address, test.address)
 		}
 	}
 }
