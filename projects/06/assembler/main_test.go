@@ -33,7 +33,7 @@ func TestRun(t *testing.T) {
 		if err != nil {
 			t.Errorf("#%d: error occurred: %v", i, err.Error())
 		}
-		if b.String != test.out {
+		if b.String() != test.out {
 			t.Errorf("#%d: got: %v want: %v", i, b.String(), test.out)
 		}
 	}

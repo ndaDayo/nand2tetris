@@ -29,6 +29,10 @@ func New(input io.Reader) *Parser {
 	}
 }
 
+func (p *Parser) Rewind() {
+	p.reader = bufio.NewReader(bytes.NewBufferString(p.source))
+}
+
 func (p *Parser) HasMoreCommand() bool {
 	_, err := p.reader.Peek(1)
 	if err != nil {

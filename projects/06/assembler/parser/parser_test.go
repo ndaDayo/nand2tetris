@@ -2,12 +2,41 @@ package parser
 
 import (
 	"bytes"
+	"io/ioutil"
 	"testing"
 )
 
 type hasMoreCommandsTest struct {
 	in  string
 	out bool
+}
+
+func TestRewind(t *testing.T) {
+	tests := []string{
+		"foo",
+		"@value",
+	}
+
+	for i, test := range tests {
+		p := New(bytes.NewBufferString(test))
+
+		expected, err := ioutil.ReadAll(p.reader)
+
+		if err != nil {
+			t.Fatalf("#%d: error returned: %v", i, err.Error())
+		}
+
+		p.Rewind()
+
+		autual, err := ioutil.ReadAll(p.reader)
+		if err != nil {
+			t.Fatalf("#%d: error returned: %v", i, err.Error())
+		}
+
+		if string(expected) != string(autual) {
+			t.Errorf("#%d: got: %v want: %v", i, string(autual), string(expected))
+		}
+	}
 }
 
 func TestHasMoreCommand(t *testing.T) {

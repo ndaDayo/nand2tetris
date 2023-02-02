@@ -58,7 +58,6 @@ func (c *Client) handleFirstPass() error {
 	}
 
 	return nil
-
 }
 
 func run(r io.Reader) (bytes.Buffer, error) {
