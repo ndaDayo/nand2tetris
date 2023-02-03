@@ -4,9 +4,17 @@ import (
 	"assembler/code"
 	"assembler/parser"
 	"assembler/symboltable"
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
+	"os"
+	"strconv"
+)
+
+const (
+	ExitCodeOK int = iota
+	ExitCodeError
 )
 
 type Client struct {
@@ -60,6 +68,57 @@ func (c *Client) handleFirstPass() error {
 	return nil
 }
 
+func (c *Client) handleSecondPass(buffer *bytes.Buffer) (bytes.Buffer, error) {
+	nextAvailableRAMAddress := 16
+	for c.parser.HasMoreCommand() {
+		c.parser.Advance()
+		commandType, err := c.parser.CommandType()
+
+		if err != nil {
+			return *buffer, err
+		}
+
+		switch commandType {
+		case parser.N:
+		case parser.C:
+			cInstruction, err := c.handleCInstruction()
+			if err != nil {
+				return *buffer, err
+			}
+
+			buffer.WriteString(fmt.Sprintf("111%s\n", cInstruction))
+		case parser.A:
+			symbol := c.parser.Symbol()
+			address, err := strconv.Atoi(symbol)
+			if err != nil {
+				if c.symboltable.Contains(symbol) {
+					address = c.symboltable.GetAddress(symbol)
+				} else {
+					address = nextAvailableRAMAddress
+					c.symboltable.AddEntry(symbol, address)
+					nextAvailableRAMAddress++
+				}
+			}
+
+			aInstruction := fmt.Sprintf("0%015b\n", address)
+			buffer.WriteString(aInstruction)
+		}
+	}
+	return *buffer, nil
+}
+
+func (c *Client) handleCInstruction() (string, error) {
+	dest := c.code.Dest(c.parser.Dest())
+	jump := c.code.Jump(c.parser.Jump())
+	comp, err := c.code.Comp(c.parser.Comp())
+
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%07b%03b%03b", comp, dest, jump), nil
+
+}
 func run(r io.Reader) (bytes.Buffer, error) {
 	var buffer bytes.Buffer
 
@@ -68,8 +127,26 @@ func run(r io.Reader) (bytes.Buffer, error) {
 	if err != nil {
 		return buffer, err
 	}
+
+	client.parser.Rewind()
+
+	buffer, err = client.handleSecondPass(&buffer)
+
+	if err != nil {
+		return buffer, err
+	}
+
+	return buffer, nil
 }
 
 func main() {
+	reader := bufio.NewReader(os.Stdin)
+	output, err := run(reader)
 
+	if err != nil {
+		fmt.Printf(err.Error())
+		os.Exit(ExitCodeError)
+	}
+	fmt.Printf(output.String())
+	os.Exit(ExitCodeOK)
 }
