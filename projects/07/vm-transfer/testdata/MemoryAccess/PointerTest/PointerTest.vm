@@ -5,6 +5,8 @@
 
 // Executes pop and push commands using the 
 // pointer, this, and that segments.
+push constant 3030
+pop pointer 0
 push constant 3040
 pop pointer 1
 push constant 32
