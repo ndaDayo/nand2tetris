@@ -23,3 +23,39 @@ func TestHasMoreCommands(t *testing.T) {
 		}
 	}
 }
+
+type advanceTest struct {
+	before  []string
+	after   []string
+	command string
+}
+
+func TestAdvance(t *testing.T) {
+	tests := []advanceTest{
+		{[]string{"push constant 0"}, []string{}, "push constant 0"},
+		{[]string{"push constant 0", "pop local 0"}, []string{"pop local 0"}, "push constant 0"},
+		{[]string{"add", "sub", "eq"}, []string{"sub", "eq"}, "add"},
+		{[]string{"label loop", "goto loop", "if-goto loop"}, []string{"goto loop", "if-goto loop"}, "label loop"},
+		{[]string{"function Main.fibonacci 2", "return"}, []string{"return"}, "function Main.fibonacci 2"},
+	}
+
+	for i, test := range tests {
+		p := &Parser{"", test.before}
+		p.Advance()
+
+		if p.currentCommand != test.command {
+			t.Errorf("#%d: got: %v want: %v", i, p.currentCommand, test.command)
+		}
+
+		if len(p.lines) != len(test.after) {
+			t.Errorf("#%d: got: %v want: %v", i, p.lines, test.after)
+		}
+
+		for j := range p.lines {
+			if p.lines[j] != test.after[j] {
+				t.Errorf("#%d: got: %v want: %v", i, p.lines[j], test.after[j])
+				break
+			}
+		}
+	}
+}
