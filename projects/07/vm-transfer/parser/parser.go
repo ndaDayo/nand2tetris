@@ -1,6 +1,10 @@
 package parser
 
-import "strings"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 type Parser struct {
 	currentCommand string
@@ -53,4 +57,21 @@ func (p *Parser) CommandType() CommandTypes {
 
 func (p *Parser) Command() string {
 	return strings.Split(p.currentCommand, " ")[0]
+}
+
+func (p *Parser) Arg1() string {
+	if p.CommandType() == ArithmeticCommand {
+		return p.currentCommand
+	}
+
+	return strings.Split(p.currentCommand, " ")[1]
+}
+
+func (p *Parser) Arg2() (int, error) {
+	arg, err := strconv.Atoi(strings.Split(p.currentCommand, " ")[2])
+
+	if err != nil {
+		return 0, fmt.Errorf("Arg2: cannot convert to int: %v", err)
+	}
+	return arg, nil
 }

@@ -116,3 +116,55 @@ func TestCommand(t *testing.T) {
 		}
 	}
 }
+
+func TestArg1(t *testing.T) {
+	tests := []commandTest{
+		{"push constant 0", "constant"},
+		{"pop location 1", "location"},
+		{"label loop", "loop"},
+		{"goto loop", "loop"},
+		{"if-goto end", "end"},
+		{"function mult 2", "mult"},
+		{"call mult 2 5", "mult"},
+		{"add", "add"},
+		{"sub", "sub"},
+		{"lt", "lt"},
+	}
+
+	for i, test := range tests {
+		p := &Parser{test.command, []string{}}
+		if p.Arg1() != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, p.Arg1(), test.command)
+		}
+	}
+}
+
+type arg2CommandTest struct {
+	command string
+	out     int
+}
+
+func TestArg2(t *testing.T) {
+	tests := []arg2CommandTest{
+		{"push constant 0", 0},
+		{"pop location 1", 1},
+		{"function mult 2", 2},
+		{"call mult 2 5", 2},
+		{"push constant a", 0},
+	}
+
+	for i, test := range tests {
+		p := &Parser{test.command, []string{}}
+		arg2, err := p.Arg2()
+
+		if err != nil && test.out != 0 {
+			t.Errorf("#%d: unexpected error: %v", i, err)
+			continue
+		}
+
+		if arg2 != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, arg2, test.out)
+			continue
+		}
+	}
+}
