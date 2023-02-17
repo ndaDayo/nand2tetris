@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 )
@@ -9,6 +11,25 @@ import (
 type Parser struct {
 	currentCommand string
 	lines          []string
+}
+
+func New(r io.Reader) *Parser {
+	var lines []string
+	scanner := bufio.NewScanner(r)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = strings.Split(line, "//")[0]
+		line = strings.Trim(line, " \t")
+		if line != "" {
+			lines = append(lines, line)
+		}
+	}
+
+	return &Parser{
+		"",
+		lines,
+	}
 }
 
 func (p *Parser) HasMoreCommands() bool {
