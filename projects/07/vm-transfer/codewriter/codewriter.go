@@ -63,6 +63,18 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 			"M=D\n" +
 			"@SP\n" +
 			"M=M+1\n"
+	case "local":
+		return "@LCL\n" +
+			"D=M\n" +
+			fmt.Sprintf("@%d\n", index) +
+			"A=D+A\n" +
+			"D=M\n" +
+			"@SP\n" +
+			"A=M\n" +
+			"M=D\n" +
+			"@SP\n" +
+			"M=M+1\n"
+
 	default:
 		return ""
 	}
