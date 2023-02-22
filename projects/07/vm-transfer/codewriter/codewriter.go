@@ -62,20 +62,30 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 		"temp":     "R5",
 		"constant": "",
 		"static":   c.namespace,
-		"pointer0": "THIS",
-		"pointer1": "THAT",
+		"pointer":  "",
 	}
 
 	segmentAddr, isSegmentMapped := segmentMap[segment]
+
+	if !isSegmentMapped {
+		return ""
+	}
+
 	switch segment {
 	case "constant":
 		return fmt.Sprintf("@%d\nD=A\n", index) +
 			pushDToStack() +
 			incrementSP()
-	default:
-		if !isSegmentMapped {
-			return ""
+	case "pointer":
+		pointerAddr := "THIS"
+		if index == 1 {
+			pointerAddr = "THAT"
 		}
+
+		return fmt.Sprintf("@%s\nD=M\n", pointerAddr) +
+			pushDToStack() +
+			incrementSP()
+	default:
 		return fmt.Sprintf("@%s\nD=M\n@%d\nA=D+A\nD=M\n", segmentAddr, index) +
 			pushDToStack() +
 			incrementSP()
