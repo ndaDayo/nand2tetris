@@ -54,28 +54,38 @@ func (c *CodeWriter) WritePushPop(command parser.CommandTypes, segment string, i
 }
 
 func (c CodeWriter) handelPushCommand(segment string, index int) string {
+	segmentMap := map[string]string{
+		"local":    "LCL",
+		"argument": "ARG",
+		"this":     "THIS",
+		"that":     "THAT",
+		"temp":     "R5",
+		"constant": "",
+		"static":   c.namespace,
+		"pointer0": "THIS",
+		"pointer1": "THAT",
+	}
+
+	segmentAddr, isSegmentMapped := segmentMap[segment]
 	switch segment {
 	case "constant":
-		return fmt.Sprintf("@%d\n", index) +
-			"D=A\n" +
-			"@SP\n" +
-			"A=M\n" +
-			"M=D\n" +
-			"@SP\n" +
-			"M=M+1\n"
-	case "local":
-		return "@LCL\n" +
-			"D=M\n" +
-			fmt.Sprintf("@%d\n", index) +
-			"A=D+A\n" +
-			"D=M\n" +
-			"@SP\n" +
-			"A=M\n" +
-			"M=D\n" +
-			"@SP\n" +
-			"M=M+1\n"
-
+		return fmt.Sprintf("@%d\nD=A\n", index) +
+			pushDToStack() +
+			incrementSP()
 	default:
-		return ""
+		if !isSegmentMapped {
+			return ""
+		}
+		return fmt.Sprintf("@%s\nD=M\n@%d\nA=D+A\nD=M\n", segmentAddr, index) +
+			pushDToStack() +
+			incrementSP()
 	}
+}
+
+func pushDToStack() string {
+	return "@SP\nA=M\nM=D\n"
+}
+
+func incrementSP() string {
+	return "@SP\nM=M+1\n"
 }
