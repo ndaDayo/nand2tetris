@@ -73,29 +73,21 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 
 	switch segment {
 	case "constant":
-		return fmt.Sprintf("@%d\nD=A\n", index) +
-			pushDToStack() +
-			incrementSP()
+		return fmt.Sprintf("@%d\nD=A\n", index) + pushAndIncrementSP()
+
 	case "pointer":
 		pointerAddr := "THIS"
 		if index == 1 {
 			pointerAddr = "THAT"
 		}
 
-		return fmt.Sprintf("@%s\nD=M\n", pointerAddr) +
-			pushDToStack() +
-			incrementSP()
+		return fmt.Sprintf("@%s\nD=M\n", pointerAddr) + pushAndIncrementSP()
+
 	default:
-		return fmt.Sprintf("@%s\nD=M\n@%d\nA=D+A\nD=M\n", segmentAddr, index) +
-			pushDToStack() +
-			incrementSP()
+		return fmt.Sprintf("@%s\nD=M\n@%d\nA=D+A\nD=M\n", segmentAddr, index) + pushAndIncrementSP()
 	}
 }
 
-func pushDToStack() string {
-	return "@SP\nA=M\nM=D\n"
-}
-
-func incrementSP() string {
-	return "@SP\nM=M+1\n"
+func pushAndIncrementSP() string {
+	return "@SP\nA=M\nM=D\n@SP\nM=M+1\n"
 }
