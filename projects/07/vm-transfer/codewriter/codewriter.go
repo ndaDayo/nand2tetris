@@ -59,10 +59,10 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 		"argument": "ARG",
 		"this":     "THIS",
 		"that":     "THAT",
-		"temp":     "R5",
+		"temp":     "",
+		"pointer":  "",
 		"constant": "",
 		"static":   c.namespace,
-		"pointer":  "",
 	}
 
 	segmentAddr, isSegmentMapped := segmentMap[segment]
@@ -82,6 +82,13 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 		}
 
 		return fmt.Sprintf("@%s\nD=M\n", pointerAddr) + pushAndIncrementSP()
+
+	case "temp":
+		addr := 5 + index
+		return fmt.Sprintf("@R%d\nD=M\n", addr) + pushAndIncrementSP()
+
+	case "static":
+		return fmt.Sprintf("@%s.%d\nD=M\n", segmentAddr, index) + pushAndIncrementSP()
 
 	default:
 		return fmt.Sprintf("@%s\nD=M\n@%d\nA=D+A\nD=M\n", segmentAddr, index) + pushAndIncrementSP()
