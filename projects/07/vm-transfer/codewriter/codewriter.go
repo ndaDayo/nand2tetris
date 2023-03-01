@@ -114,14 +114,17 @@ func (c CodeWriter) handelPopCommand(segment string, index int) string {
 	switch segment {
 	case "constant":
 		return ""
-	default:
-		code += fmt.Sprintf("@%s\nA=M\n", segmentAddr)
-
-		for i := 0; i < index; i++ {
-			code += "A=A+1\n"
+	case "pointer":
+		pointerAddr := "THIS"
+		if index == 1 {
+			pointerAddr = "THAT"
 		}
 
-		code += "M=D\n"
+		code += fmt.Sprintf("@%s\nM=D\n", pointerAddr)
+
+		return code
+	default:
+		code += fmt.Sprintf("@%s\nA=M\n", segmentAddr) + incrementAddr(index) + "M=D\n"
 
 		return code
 	}
@@ -129,4 +132,13 @@ func (c CodeWriter) handelPopCommand(segment string, index int) string {
 
 func popFromStack() string {
 	return "@SP\nM=M-1\nA=M\nD=M\n"
+}
+
+func incrementAddr(index int) string {
+	code := ""
+	for i := 0; i < index; i++ {
+		code += "A=A+1\n"
+	}
+
+	return code
 }
