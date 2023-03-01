@@ -5,6 +5,26 @@ import (
 	"vm-transfer/parser"
 )
 
+type writeArithmeticTest struct {
+	command string
+	out     string
+}
+
+func TestWriteArithmetic(t *testing.T) {
+	tests := []writeArithmeticTest{
+		{"add", "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=D+M\n@SP\nM=M+1\n"},
+	}
+
+	for i, test := range tests {
+		c := New()
+		c.WriteArithmetic(test.command)
+
+		if c.writer.String() != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, c.writer.String(), test.out)
+		}
+	}
+}
+
 type writePushPopTest struct {
 	commandType parser.CommandTypes
 	segment     string
