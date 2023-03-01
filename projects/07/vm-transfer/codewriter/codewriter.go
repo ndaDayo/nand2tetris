@@ -78,7 +78,6 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 	switch segment {
 	case "constant":
 		return fmt.Sprintf("@%d\nD=A\n", index) + pushAndIncrementSP()
-
 	case "pointer":
 		pointerAddr := "THIS"
 		if index == 1 {
@@ -86,14 +85,11 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 		}
 
 		return fmt.Sprintf("@%s\nD=M\n", pointerAddr) + pushAndIncrementSP()
-
 	case "temp":
 		addr := 5 + index
 		return fmt.Sprintf("@R%d\nD=M\n", addr) + pushAndIncrementSP()
-
 	case "static":
 		return fmt.Sprintf("@%s.%d\nD=M\n", c.namespace, index) + pushAndIncrementSP()
-
 	default:
 		return fmt.Sprintf("@%s\nD=M\n@%d\nA=D+A\nD=M\n", segmentAddr, index) + pushAndIncrementSP()
 	}
@@ -121,6 +117,15 @@ func (c CodeWriter) handelPopCommand(segment string, index int) string {
 		}
 
 		code += fmt.Sprintf("@%s\nM=D\n", pointerAddr)
+
+		return code
+	case "temp":
+		addr := 5 + index
+		code += fmt.Sprintf("@R%d\nM=D\n", addr)
+
+		return code
+	case "static":
+		code += fmt.Sprintf("@%s.%d\nM=D\n", c.namespace, index)
 
 		return code
 	default:

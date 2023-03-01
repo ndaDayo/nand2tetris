@@ -48,6 +48,11 @@ func TestWritePop(t *testing.T) {
 		{parser.PopCommand, "that", 3, "@SP\nM=M-1\nA=M\nD=M\n@THAT\nA=M\nA=A+1\nA=A+1\nA=A+1\nM=D\n"},
 		{parser.PopCommand, "pointer", 0, "@SP\nM=M-1\nA=M\nD=M\n@THIS\nM=D\n"},
 		{parser.PopCommand, "pointer", 1, "@SP\nM=M-1\nA=M\nD=M\n@THAT\nM=D\n"},
+		{parser.PopCommand, "temp", 0, "@SP\nM=M-1\nA=M\nD=M\n@R5\nM=D\n"},
+		{parser.PopCommand, "temp", 2, "@SP\nM=M-1\nA=M\nD=M\n@R7\nM=D\n"},
+		{parser.PopCommand, "temp", 12, "@SP\nM=M-1\nA=M\nD=M\n@R17\nM=D\n"},
+		{parser.PopCommand, "static", 1, "@SP\nM=M-1\nA=M\nD=M\n@Static.1\nM=D\n"},
+		{parser.PopCommand, "static", 4, "@SP\nM=M-1\nA=M\nD=M\n@Static.4\nM=D\n"},
 	}
 
 	for i, test := range tests {
