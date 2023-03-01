@@ -51,6 +51,34 @@ func (c *CodeWriter) SetNamespace(namespace string) {
 	c.namespace = namespace
 }
 
+func (c *CodeWriter) WriteArithmetic(command string) error {
+	code := ""
+
+	switch command {
+	case "add":
+		code = popFromStack() + "D=M\n" + popFromStack()
+		op, err := binaryCommandOperator(command)
+
+		if err != nil {
+			return err
+		}
+		code += fmt.Sprintf("M=D%sM\n", op) + incrementSP()
+	}
+
+	_, err := c.writer.WriteString(code)
+
+	return err
+}
+
+func binaryCommandOperator(command string) (string, error) {
+	switch command {
+	case "add":
+		return "+", nil
+	default:
+		return "", fmt.Errorf("%s is not a valid binary command", command)
+	}
+}
+
 func (c *CodeWriter) WritePushPop(command parser.CommandTypes, segment string, index int) error {
 	code := ""
 
@@ -106,7 +134,7 @@ func (c CodeWriter) handelPopCommand(segment string, index int) string {
 		return ""
 	}
 
-	code := popFromStack()
+	code := popFromStack() + "D=M\n"
 	switch segment {
 	case "constant":
 		return ""
@@ -136,7 +164,7 @@ func (c CodeWriter) handelPopCommand(segment string, index int) string {
 }
 
 func popFromStack() string {
-	return "@SP\nM=M-1\nA=M\nD=M\n"
+	return "@SP\nM=M-1\nA=M\n"
 }
 
 func incrementAddr(index int) string {
@@ -146,4 +174,8 @@ func incrementAddr(index int) string {
 	}
 
 	return code
+}
+
+func incrementSP() string {
+	return "@SP\nM=M+1\n"
 }
