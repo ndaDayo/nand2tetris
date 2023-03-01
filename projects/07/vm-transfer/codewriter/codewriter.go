@@ -55,7 +55,7 @@ func (c *CodeWriter) WriteArithmetic(command string) error {
 	code := ""
 
 	switch command {
-	case "add":
+	case "add", "and", "or":
 		code = popFromStack() + "D=M\n" + popFromStack()
 		op, err := binaryCommandOperator(command)
 
@@ -74,6 +74,10 @@ func binaryCommandOperator(command string) (string, error) {
 	switch command {
 	case "add":
 		return "+", nil
+	case "and":
+		return "&", nil
+	case "or":
+		return "|", nil
 	default:
 		return "", fmt.Errorf("%s is not a valid binary command", command)
 	}
