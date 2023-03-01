@@ -12,7 +12,7 @@ type writePushPopTest struct {
 	out         string
 }
 
-func TestWritePushPop(t *testing.T) {
+func TestWritePush(t *testing.T) {
 	tests := []writePushPopTest{
 		{parser.PushCommand, "constant", 10, "@10\nD=A\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"},
 		{parser.PushCommand, "local", 8, "@LCL\nD=M\n@8\nA=D+A\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"},
@@ -26,6 +26,23 @@ func TestWritePushPop(t *testing.T) {
 		{parser.PushCommand, "temp", 12, "@R17\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"},
 		{parser.PushCommand, "static", 1, "@Static.1\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"},
 		{parser.PushCommand, "static", 4, "@Static.4\nD=M\n@SP\nA=M\nM=D\n@SP\nM=M+1\n"},
+	}
+
+	for i, test := range tests {
+		c := New()
+		c.SetNamespace("Static")
+		c.WritePushPop(test.commandType, test.segment, test.index)
+
+		if c.writer.String() != test.out {
+			t.Errorf("#%d: got: %v want: %v", i, c.writer.String(), test.out)
+		}
+	}
+}
+
+func TestWritePop(t *testing.T) {
+	tests := []writePushPopTest{
+		{parser.PopCommand, "local", 1, "@SP\nM=M-1\nA=M\nD=M\n@LCL\nA=M\nA=A+1\nM=D\n"},
+		{parser.PopCommand, "local", 3, "@SP\nM=M-1\nA=M\nD=M\n@LCL\nA=M\nA=A+1\nA=A+1\nA=A+1\nM=D\n"},
 	}
 
 	for i, test := range tests {

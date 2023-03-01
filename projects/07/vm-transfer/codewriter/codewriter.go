@@ -16,10 +16,22 @@ type CodeWriter struct {
 	gtIndex      int
 	ltIndex      int
 	writer       *bytes.Buffer
+	segmentMap   map[string]string
 }
 
 func New() *CodeWriter {
 	buffer := bytes.Buffer{}
+
+	segmentMap := map[string]string{
+		"local":    "LCL",
+		"argument": "ARG",
+		"this":     "THIS",
+		"that":     "THAT",
+		"temp":     "",
+		"pointer":  "",
+		"constant": "",
+		"static":   "",
+	}
 
 	return &CodeWriter{
 		"",
@@ -30,6 +42,7 @@ func New() *CodeWriter {
 		0,
 		0,
 		&buffer,
+		segmentMap,
 	}
 
 }
@@ -44,6 +57,8 @@ func (c *CodeWriter) WritePushPop(command parser.CommandTypes, segment string, i
 	switch command {
 	case parser.PushCommand:
 		code = c.handelPushCommand(segment, index)
+	case parser.PopCommand:
+		code = c.handelPopCommand(segment, index)
 	default:
 		return errors.New("codewriter.WritePushPop only accepts PushCommand and PopCommand")
 	}
@@ -54,18 +69,7 @@ func (c *CodeWriter) WritePushPop(command parser.CommandTypes, segment string, i
 }
 
 func (c CodeWriter) handelPushCommand(segment string, index int) string {
-	segmentMap := map[string]string{
-		"local":    "LCL",
-		"argument": "ARG",
-		"this":     "THIS",
-		"that":     "THAT",
-		"temp":     "",
-		"pointer":  "",
-		"constant": "",
-		"static":   c.namespace,
-	}
-
-	segmentAddr, isSegmentMapped := segmentMap[segment]
+	segmentAddr, isSegmentMapped := c.segmentMap[segment]
 
 	if !isSegmentMapped {
 		return ""
@@ -88,7 +92,7 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 		return fmt.Sprintf("@R%d\nD=M\n", addr) + pushAndIncrementSP()
 
 	case "static":
-		return fmt.Sprintf("@%s.%d\nD=M\n", segmentAddr, index) + pushAndIncrementSP()
+		return fmt.Sprintf("@%s.%d\nD=M\n", c.namespace, index) + pushAndIncrementSP()
 
 	default:
 		return fmt.Sprintf("@%s\nD=M\n@%d\nA=D+A\nD=M\n", segmentAddr, index) + pushAndIncrementSP()
@@ -97,4 +101,32 @@ func (c CodeWriter) handelPushCommand(segment string, index int) string {
 
 func pushAndIncrementSP() string {
 	return "@SP\nA=M\nM=D\n@SP\nM=M+1\n"
+}
+
+func (c CodeWriter) handelPopCommand(segment string, index int) string {
+	segmentAddr, isSegmentMapped := c.segmentMap[segment]
+
+	if !isSegmentMapped {
+		return ""
+	}
+
+	code := popFromStack()
+	switch segment {
+	case "constant":
+		return ""
+	default:
+		code += fmt.Sprintf("@%s\nA=M\n", segmentAddr)
+
+		for i := 0; i < index; i++ {
+			code += "A=A+1\n"
+		}
+
+		code += "M=D\n"
+
+		return code
+	}
+}
+
+func popFromStack() string {
+	return "@SP\nM=M-1\nA=M\nD=M\n"
 }
