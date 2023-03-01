@@ -62,7 +62,11 @@ func (c *CodeWriter) WriteArithmetic(command string) error {
 		if err != nil {
 			return err
 		}
+
 		code += fmt.Sprintf("M=D%sM\n", op) + incrementSP()
+	case "sub":
+		code = popFromStack() + "D=M\n" + popFromStack()
+		code += fmt.Sprintf("M=M-D\n") + incrementSP()
 	}
 
 	_, err := c.writer.WriteString(code)
