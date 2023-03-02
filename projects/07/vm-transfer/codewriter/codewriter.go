@@ -12,9 +12,7 @@ type CodeWriter struct {
 	functionName string
 	namespace    string
 	callIndices  map[string]int
-	eqIndex      int
-	gtIndex      int
-	ltIndex      int
+	labelId      int
 	writer       *bytes.Buffer
 	segmentMap   map[string]string
 }
@@ -38,8 +36,6 @@ func New() *CodeWriter {
 		"",
 		"",
 		make(map[string]int),
-		0,
-		0,
 		0,
 		&buffer,
 		segmentMap,
@@ -73,11 +69,42 @@ func (c *CodeWriter) WriteArithmetic(command string) error {
 			return err
 		}
 		code = popFromStack() + fmt.Sprintf("M=%sM\n", op) + incrementSP()
+
+	case "eq":
+		c.labelId++
+
+		code = popFromStack() + "D=M\n" + popFromStack() + "D=M-D\n"
+
+		trueLabel := fmt.Sprintf("IF_TRUE%d", c.labelId)
+		endLabel := fmt.Sprintf("IF_END%d", c.labelId)
+
+		jumpMap := map[string]string{
+			"eq": "JEQ",
+			"gt": "JGT",
+			"lt": "JLT",
+		}
+
+		jump, ok := jumpMap[command]
+		if !ok {
+			return fmt.Errorf("invalid command %s", command)
+		}
+
+		code += fmt.Sprintf("@%s\nD;%s\n", trueLabel, jump)
+		code += pushToStack("0")
+		code += fmt.Sprintf("@%s\n0;JMP\n", endLabel)
+		code += fmt.Sprintf("(%s)\n", trueLabel)
+		code += pushToStack("-1")
+		code += fmt.Sprintf("(%s)\n", endLabel)
+		code += incrementSP()
 	}
 
 	_, err := c.writer.WriteString(code)
 
 	return err
+}
+
+func pushToStack(value string) string {
+	return "@SP\nA=M\nM=" + value + "\n"
 }
 
 func binaryCommandOperator(command string) (string, error) {

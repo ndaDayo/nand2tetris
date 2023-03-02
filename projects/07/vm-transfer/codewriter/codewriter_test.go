@@ -18,6 +18,7 @@ func TestWriteArithmetic(t *testing.T) {
 		{"sub", "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nM=M-D\n@SP\nM=M+1\n"},
 		{"neg", "@SP\nM=M-1\nA=M\nM=-M\n@SP\nM=M+1\n"},
 		{"not", "@SP\nM=M-1\nA=M\nM=!M\n@SP\nM=M+1\n"},
+		{"eq", "@SP\nM=M-1\nA=M\nD=M\n@SP\nM=M-1\nA=M\nD=M-D\n@IF_TRUE1\nD;JEQ\n@SP\nA=M\nM=0\n@IF_END1\n0;JMP\n(IF_TRUE1)\n@SP\nA=M\nM=-1\n(IF_END1)\n@SP\nM=M+1\n"},
 	}
 
 	for i, test := range tests {
