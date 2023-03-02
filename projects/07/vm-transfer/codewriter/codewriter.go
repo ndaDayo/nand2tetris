@@ -70,7 +70,7 @@ func (c *CodeWriter) WriteArithmetic(command string) error {
 		}
 		code = popFromStack() + fmt.Sprintf("M=%sM\n", op) + incrementSP()
 
-	case "eq":
+	case "eq", "gt", "lt":
 		c.labelId++
 
 		code = popFromStack() + "D=M\n" + popFromStack() + "D=M-D\n"
