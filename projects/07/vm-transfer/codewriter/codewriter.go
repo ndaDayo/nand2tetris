@@ -67,6 +67,12 @@ func (c *CodeWriter) WriteArithmetic(command string) error {
 	case "sub":
 		code = popFromStack() + "D=M\n" + popFromStack()
 		code += fmt.Sprintf("M=M-D\n") + incrementSP()
+	case "neg", "not":
+		op, err := unaryCommandOperator(command)
+		if err != nil {
+			return err
+		}
+		code = popFromStack() + fmt.Sprintf("M=%sM\n", op) + incrementSP()
 	}
 
 	_, err := c.writer.WriteString(code)
@@ -84,6 +90,17 @@ func binaryCommandOperator(command string) (string, error) {
 		return "|", nil
 	default:
 		return "", fmt.Errorf("%s is not a valid binary command", command)
+	}
+}
+
+func unaryCommandOperator(command string) (string, error) {
+	switch command {
+	case "neg":
+		return "-", nil
+	case "not":
+		return "!", nil
+	default:
+		return "", fmt.Errorf("%s is not a valid unary command", command)
 	}
 }
 
