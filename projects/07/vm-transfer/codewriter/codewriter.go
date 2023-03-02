@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"vm-transfer/parser"
 )
 
@@ -41,6 +42,10 @@ func New() *CodeWriter {
 		segmentMap,
 	}
 
+}
+
+func (c *CodeWriter) SetFileName(filename string) {
+	c.filename = filename
 }
 
 func (c *CodeWriter) SetNamespace(namespace string) {
@@ -230,4 +235,13 @@ func incrementAddr(index int) string {
 
 func incrementSP() string {
 	return "@SP\nM=M+1\n"
+}
+
+func (c *CodeWriter) Save() {
+	f, err := os.Create(c.filename)
+	if err != nil {
+		panic(err)
+	}
+
+	f.Write(c.writer.Bytes())
 }
